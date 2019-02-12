@@ -1,0 +1,30 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    i18n_domain="collective.showreferences">
+
+  <!-- Set overrides folder for Just-a-Bunch-Of-Templates product -->
+  <include package="z3c.jbot" file="meta.zcml" />
+  <browser:jbot
+      directory="overrides"
+      layer="collective.showreferences.interfaces.ICollectiveShowreferencesLayer"
+      />
+
+  <!-- Publish static files -->
+  <plone:static
+      name="collective.showreferences"
+      type="plone"
+      directory="static"
+      />
+
+  <browser:page
+      for="Products.CMFCore.interfaces._content.IContentish"
+      name="item_references"
+      class=".references.ItemReferences"
+      template="item_references.pt"
+      layer="collective.showreferences.interfaces.ICollectiveShowreferencesLayer"
+      permission="zope2.View"
+      />
+
+</configure>

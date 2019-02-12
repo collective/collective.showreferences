@@ -1,0 +1,120 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      lang="en"
+      metal:use-macro="here/main_template/macros/master"
+      i18n:domain="plone">
+
+<body>
+
+
+<tal:block metal:fill-slot="content-core">
+
+  <tal:block metal:define-macro="list_references">
+
+    <ul tal:condition="exists:items">
+      <li tal:repeat="dict items">
+       <tal:block tal:define="item nocall:dict/item; rel dict/rel">
+       <span tal:define="desc                item/Description;
+                         item_type           item/portal_type;
+                         item_type_class     python:'contenttype-' + normalizeString(item_type);
+                         item_wf_state       item/review_state|python: getInfoFor(item, 'review_state', '');
+                         item_wf_state_class python: 'state-' + normalizeString(item_wf_state);
+                         item_url            item/getURL|item/absolute_url;
+                         item_url            python:(item_type in use_view_action) and item_url+'/view' or item_url;">
+          <span tal:attributes="class item_type_class">
+            <a href="" class=""
+               tal:attributes="href  item_url;
+                               title desc;
+                               class string:$item_wf_state_class">
+                <span tal:content="item/pretty_title_or_id" /></a>
+            <span tal:condition="python: rel != 'link'">
+              (Verweisart: <i tal:content="rel"/>)
+            </span>
+          </span>
+        </span>
+        </tal:block>
+      </li>
+    </ul>
+
+  </tal:block>
+
+  <tal:block tal:define="references view/references;
+                         broken_refs python:references['broken_refs'];
+                         broken_backrefs python:references['broken_backrefs'];
+                         refs python:references['refs'];
+                         backrefs python:references['backrefs'];
+                         links python:references['links'];
+                         backlinks python:references['backlinks'];
+                         ploneview nocall:context/@@plone;
+                         normalizeString nocall:ploneview/normalizeString;
+                         tools nocall:context/@@plone_tools;
+                         wf_tool tools/workflow;
+                         getInfoFor python:wf_tool.getInfoFor;
+                         site_properties context/portal_properties/site_properties;
+                         use_view_action site_properties/typesUseViewActionInListings|python:();">
+
+      <h2 tal:condition="python: not refs and not backrefs and not links and not backlinks">Dieses Objekt hat keine ein- oder ausgehenden Links oder Verweise</h2>
+
+      <tal:block tal:condition="python: refs or backrefs">
+      <h2>Verweise (Referenzen)</h2>
+
+      <tal:block tal:define="items refs"
+                 tal:condition="items">
+        <h3>Das Objekt verweist auf:</h3>
+        <tal:block metal:use-macro="context/item_references/list_references"/>
+      </tal:block>
+
+      <tal:block tal:define="items backrefs"
+                 tal:condition="items">
+        <h3>Auf das Objekt wird verwiesen von:</h3>
+        <tal:block metal:use-macro="context/item_references/list_references"/>
+      </tal:block>
+      </tal:block>
+
+      <tal:block tal:condition="python: broken_refs or broken_backrefs">
+      <h2>Kaputte Referenzen</h2>
+      <tal:block tal:define="items broken_refs"
+                 tal:condition="items">
+        <h3>Das Objekt enthält kaputte Verweise:</h3>
+        <ul>
+          <tal:block tal:repeat="item items">
+            <li tal:content="python:item.__dict__" />
+          </tal:block>
+        </ul>
+      </tal:block>
+
+      <tal:block tal:define="items broken_backrefs"
+                 tal:condition="items">
+        <h3>Auf das Objekt gibt es kaputte Rückverweise:</h3>
+        <ul>
+          <tal:block tal:repeat="item items">
+            <li tal:content="python:item.__dict__" />
+          </tal:block>
+        </ul>
+      </tal:block>
+      </tal:block>
+
+      <tal:block tal:condition="python: links or backlinks">
+      <h2>Links (im Editor)</h2>
+
+      <tal:block tal:define="items links"
+                 tal:condition="items">
+        <h3>Das Objekt enthält Links auf:</h3>
+        <tal:block metal:use-macro="context/item_references/list_references"/>
+      </tal:block>
+
+      <tal:block tal:define="items backlinks"
+                 tal:condition="items">
+        <h3>Das Objekt ist verlinkt von:</h3>
+        <tal:block metal:use-macro="context/item_references/list_references"/>
+      </tal:block>
+      </tal:block>
+
+  </tal:block>
+
+</tal:block>
+
+</body>
+</html>
